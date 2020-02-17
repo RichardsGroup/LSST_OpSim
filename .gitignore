@@ -1,3 +1,13 @@
+# apple
+.DS_Store
+
+# vscode
+.vscode
+
+# opsim tmp result
+TestOutput/*
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
