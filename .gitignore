@@ -6,7 +6,7 @@
 
 # opsim tmp result
 TestOutput/*
-
+*Output/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
