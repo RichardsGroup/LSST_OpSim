@@ -13,7 +13,7 @@ Drexel University, with extensive help from the SciServer team.
 ### Setup
 The instructions on how to create an account on
 [SciServer](http://www.sciserver.org/), create a container with the
-necessary softwares installed and the cadence volume mounted can be
+necessary software installed and the cadence volume mounted can be
 found in [sciserver_opsim.pdf](./sciserver_opsim.pdf)
 
 ### Getting Started
