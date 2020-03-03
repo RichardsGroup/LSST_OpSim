@@ -26,6 +26,7 @@ order listed below:
 - [Multiple_Opsims.ipynb](./Scripts_NBs/Multiple_Opsims.ipynb): A notebook showing how to run some metrics on multiple (all) opsims. 
 - [View_Results.ipynb](./Scripts_NBs/View_Results.ipynb): A notebook showing how to read in the result produced in the notebook above.
 - [wfdFootPrint.ipynb](./Scripts_NBs/wfdFootPrint.ipynb): A notebook showing how to use a custom healpix slicer to run metrics on WFD observations only. Since the Feature-based opsims no longer use fixed tiles, we have get WFD observations through some tricks. For more discussions on this topic, please see [this thread on LSST community.com](https://community.lsst.org/t/wfd-metrics-with-the-fbs-output/3970/7)
+- [DDF_Other_FootPrint.ipynb](./Scripts_NBs/DDF_Other_FootPrint.ipynb): A notebook showing how to run metrics on DDF only or areas that are outside DDF and WFD.
 
 **Note:** The `opsimUtils.py` script must be kept in the same directory in which you want to run the notebooks.
 
