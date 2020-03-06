@@ -1,6 +1,7 @@
 import glob
 import os
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 
@@ -172,7 +173,7 @@ def getSummaryStatNames(resultDb, metricName, metricId=None):
         return returnList
 
 
-def getSummary(resultDbs, metricName, summaryStatName, runNames=None, **kwargs):
+def getSummary(resultDbs, metricName, summaryStatName, runNames=None, pandas=False, **kwargs):
     '''
     Return one summary statstic for opsims (included in the resultDbs) on a
     particualr metric given some constraints.
@@ -183,6 +184,8 @@ def getSummary(resultDbs, metricName, summaryStatName, runNames=None, **kwargs):
         summaryStatName(str): The name of the summary statistic get (e.g., Median)
         runNames(list): A list of runNames to retrieve summary stats, if not
             all in resultDbs.
+        pandas (bool): Whether to return result in pandas dataframe, otherwise a dictionary
+            of numpy record arrays.
 
     Returns:
         stats(dict): Each element is a list of summary stats for the corresponding
@@ -197,7 +200,17 @@ def getSummary(resultDbs, metricName, summaryStatName, runNames=None, **kwargs):
         mIds = resultDbs[run].getMetricId(metricName=metricName, **kwargs)
         stats[run] = np.unique(resultDbs[run].getSummaryStats(
             mIds, summaryName=summaryStatName))
-    return stats
+    
+    if pandas:
+        df_ls = []
+        for key in stats:
+            df = pd.DataFrame.from_records(stats[key])
+            df['runName'] = key
+            df_ls.append(df)
+        df_rt = pd.concat(df_ls, ignore_index=True)
+        return df_rt
+    else:
+        return stats
 
 
 def plotSummaryBar(resultDbs, metricName, summaryStatName, runNames=None, **kwargs):
@@ -216,9 +229,9 @@ def plotSummaryBar(resultDbs, metricName, summaryStatName, runNames=None, **kwar
     rcParams['text.usetex'] = False
     rcParams['font.size'] = 10
     rcParams['axes.titlepad'] = 10
-
+    
     stats = getSummary(resultDbs, metricName,
-                       summaryStatName, runNames, **kwargs)
+                       summaryStatName, runNames)
 
     if runNames is None:
         runNames = list(resultDbs.keys())
@@ -227,7 +240,7 @@ def plotSummaryBar(resultDbs, metricName, summaryStatName, runNames=None, **kwar
     x = np.arange(len(runNames))
     width = 0.25
 
-    fig, ax = plt.subplots(figsize=(8, 6))
+    fig, ax = plt.subplots(figsize=(10, 6))
 
     for i in range(stats_size):
         label = '{}_{}_{}'.format(
@@ -248,17 +261,22 @@ def plotSummaryBar(resultDbs, metricName, summaryStatName, runNames=None, **kwar
 
         ax.bar(x+shift, summaryValues, width, label=label)
 
+    # set whether to draw hline
+    hline = kwargs.get('axhline')
+    if hline is not None:
+        plt.axhline(int(hline), color='k', ls='--')
+    
     ax.set_xticks(x)
     ax.set_xticklabels(runNames)
     plt.xticks(rotation=80)
     plt.title('Bar Chart for Summary Stat: {} of Metric: {}'.format(
         summaryStatName, metricName))
     plt.ylabel('Summary Values')
-    plt.legend()
+    plt.legend(loc=(1.0, 0.2))
     fig.tight_layout()
 
 
-def plotHist(bundleDicts, metricKey, runNames=None):
+def plotHist(bundleDicts, metricKey, runNames=None, **kwargs):
     '''
     Plot histogram of evaluated metrics for each opsim in the bundleDicts on
     one figure.
@@ -289,8 +307,14 @@ def plotHist(bundleDicts, metricKey, runNames=None):
 
     # set metrics to plot togehter
     ph.setMetricBundles(bundleList)
-    ph.plot(plotFunc=healpixhist, plotDicts=plotDicts)
-
+    fn = ph.plot(plotFunc=healpixhist, plotDicts=plotDicts)
+    
+    # set whether to draw hline
+    vline = kwargs.get('axvline')
+    if vline is not None:
+        plt.figure(fn)
+        plt.axvline(int(vline), color='k', ls='--')
+        
 
 def plotSky(bundleDicts, metricKey):
     '''
