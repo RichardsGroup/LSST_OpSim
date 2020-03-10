@@ -55,10 +55,13 @@ def ddfInfo(opsimdb, ddfName):
     if ddfName not in ddfCoord.keys():
         print('DDF name provided is not correct! Please use one of the below: \n')
         print(list(ddfCoord.keys()))
-        return
+        return None
+    elif len(opsimdb.fetchPropInfo()[1]['DD']) == 0:
+        print ('No DDF in this Opsim run!')
+        return None
     else:
         ddfInfo = {}
-        propInfo = opsimdb.fetchPropInfo()[0]
+        propInfo = opsimdb.fetchPropInfo()[0]        
         ddfInfo['proposalId'] = [key for key, elem in propInfo.items() if
                                  elem == 'DD:{}'.format(ddfName)][0]
         ddfInfo['Coord'] = ddfCoord[ddfName]
@@ -333,13 +336,23 @@ def plotHist(bundleDicts, metricKey, runNames=None, **kwargs):
     plotDictTemp = {'figsize': (8, 6), 'fontsize': 15, 'labelsize': 13}
     plotDicts = []
     bundleList = []
+    
+    # check if plot for DDF
+    ddf = kwargs.get('ddf')
 
-    if runNames is None:
+    # loop over all opsims
+    if runNames is None: 
         runNames = list(bundleDicts.keys())
     for runName in runNames:
         plotDict = plotDictTemp.copy()
         plotDict.update({'label': runName})
         plotDicts.append(plotDict)
+        
+        # if plot for ddf, search for key
+        if ddf:
+            keys = [*bundleDicts[runName].keys()]
+            metricKey = [elem for elem in keys if elem[1] == metricKey[1]][0]
+
         bundleList.append(bundleDicts[runName][metricKey])
 
     # set metrics to plot togehter
