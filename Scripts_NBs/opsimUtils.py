@@ -13,6 +13,15 @@ import lsst.sims.maf.slicers as slicers
 import lsst.sims.maf.metrics as metrics
 import lsst.sims.maf.db as db
 
+# DDF RA/DEC dict
+ddfCoord = {
+    'COSMOS': (150.4, 2.8),
+    'ELAISS1': (0.0, -45.5),
+    'XMM-LSS': (34.4, -5.1),
+    'ECDFS': (53.0, -27.4),
+    '290': (349.4, -63.3)
+}
+
 
 def show_opsims(dbDir):
     '''Show available opsim databases in the provided directory.
@@ -26,6 +35,34 @@ def show_opsims(dbDir):
     runNames = [os.path.splitext(os.path.basename(x))[0] for x in db_list]
 
     return runNames
+
+
+def ddfInfo(opsimdb, ddfName):
+    """
+    Return DDF metainfo given the name and a opsim database object.
+
+    Args:
+        opsimdb: An opsim database object.
+        ddfName(str): The name of the requested DDF field, e.g., COSMOS
+
+    Returns:
+        ddfInfo(dict): A dictionary containing metainfo (proposalId, RA/DEC and etc.) 
+            for the requested DDF field. 
+    """
+
+    ddfName = str(ddfName)
+
+    if ddfName not in ddfCoord.keys():
+        print('DDF name provided is not correct! Please use one of the below: \n')
+        print(list(ddfCoord.keys()))
+        return
+    else:
+        ddfInfo = {}
+        propInfo = opsimdb.fetchPropInfo()[0]
+        ddfInfo['proposalId'] = [key for key, elem in propInfo.items() if
+                                 elem == 'DD:{}'.format(ddfName)][0]
+        ddfInfo['Coord'] = ddfCoord[ddfName]
+        return ddfInfo
 
 
 def connect_dbs(dbDir, outDir):
@@ -200,7 +237,7 @@ def getSummary(resultDbs, metricName, summaryStatName, runNames=None, pandas=Fal
         mIds = resultDbs[run].getMetricId(metricName=metricName, **kwargs)
         stats[run] = np.unique(resultDbs[run].getSummaryStats(
             mIds, summaryName=summaryStatName))
-    
+
     if pandas:
         df_ls = []
         for key in stats:
@@ -229,7 +266,7 @@ def plotSummaryBar(resultDbs, metricName, summaryStatName, runNames=None, **kwar
     rcParams['text.usetex'] = False
     rcParams['font.size'] = 10
     rcParams['axes.titlepad'] = 10
-    
+
     stats = getSummary(resultDbs, metricName,
                        summaryStatName, runNames)
 
@@ -265,7 +302,7 @@ def plotSummaryBar(resultDbs, metricName, summaryStatName, runNames=None, **kwar
     hline = kwargs.get('axhline')
     if hline is not None:
         plt.axhline(int(hline), color='k', ls='--')
-    
+
     ax.set_xticks(x)
     ax.set_xticklabels(runNames)
     plt.xticks(rotation=80)
@@ -308,13 +345,13 @@ def plotHist(bundleDicts, metricKey, runNames=None, **kwargs):
     # set metrics to plot togehter
     ph.setMetricBundles(bundleList)
     fn = ph.plot(plotFunc=healpixhist, plotDicts=plotDicts)
-    
+
     # set whether to draw hline
     vline = kwargs.get('axvline')
     if vline is not None:
         plt.figure(fn)
         plt.axvline(int(vline), color='k', ls='--')
-        
+
 
 def plotSky(bundleDicts, metricKey):
     '''
