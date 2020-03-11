@@ -2,6 +2,7 @@ import glob
 import os
 import numpy as np
 import pandas as pd
+import healpy as hp
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 
@@ -15,11 +16,11 @@ import lsst.sims.maf.db as db
 
 # DDF RA/DEC dict
 ddfCoord = {
-    'COSMOS': (150.4, 2.8),
-    'ELAISS1': (0.0, -45.5),
-    'XMM-LSS': (34.4, -5.1),
-    'ECDFS': (53.0, -27.4),
-    '290': (349.4, -63.3)
+    'COSMOS': (150.10, 2.18),
+    'ELAISS1': (9.45, -44.0),
+    'XMM-LSS': (35.71, -4.75),
+    'ECDFS': (53.13, -28.1),
+    '290': (349.5, -63.4)
 }
 
 
@@ -57,11 +58,11 @@ def ddfInfo(opsimdb, ddfName):
         print(list(ddfCoord.keys()))
         return None
     elif len(opsimdb.fetchPropInfo()[1]['DD']) == 0:
-        print ('No DDF in this Opsim run!')
+        print('No DDF in this Opsim run!')
         return None
     else:
         ddfInfo = {}
-        propInfo = opsimdb.fetchPropInfo()[0]        
+        propInfo = opsimdb.fetchPropInfo()[0]
         ddfInfo['proposalId'] = [key for key, elem in propInfo.items() if
                                  elem == 'DD:{}'.format(ddfName)][0]
         ddfInfo['Coord'] = ddfCoord[ddfName]
@@ -336,18 +337,18 @@ def plotHist(bundleDicts, metricKey, runNames=None, **kwargs):
     plotDictTemp = {'figsize': (8, 6), 'fontsize': 15, 'labelsize': 13}
     plotDicts = []
     bundleList = []
-    
+
     # check if plot for DDF
     ddf = kwargs.get('ddf')
 
     # loop over all opsims
-    if runNames is None: 
+    if runNames is None:
         runNames = list(bundleDicts.keys())
     for runName in runNames:
         plotDict = plotDictTemp.copy()
         plotDict.update({'label': runName})
         plotDicts.append(plotDict)
-        
+
         # if plot for ddf, search for key
         if ddf:
             keys = [*bundleDicts[runName].keys()]
@@ -379,3 +380,36 @@ def plotSky(bundleDicts, metricKey):
     healpixSky = plots.HealpixSkyMap()
     for run in bundleDicts:
         bundleDicts[run][metricKey].plot(plotFunc=healpixSky, savefig=False)
+
+
+def plotSky_DDF(mb, ddfName, xsize=250, scale=None):
+    '''
+    Plot High-Res DDF skymap. 
+
+    Args:
+        mb: MetricBundle object.
+        ddfName(str): The string name of the DDF field, e.g., COSMOS.
+        xsize(int): The dimention of the plot in pixels, default is 250 pixels.
+        scale (func): A scaling function for the metric data, e.g., np.log10
+    '''
+    if scale is None:
+        hp.gnomview(mb.metricValues, rot=list(ddfCoord[ddfName]), flip='astro',
+                    xsize=xsize)
+    else:
+        try:
+            mbValues = mb.metricValues.copy()
+            mask = mbValues.mask
+            data = mbValues.data[~mask]
+            nData = scale(data)
+        except Exception as e:
+            print(e)
+            return None
+        else:
+            mbValues.data[~mask] = nData
+
+        hp.gnomview(mbValues, rot=list(ddfCoord[ddfName]), flip='astro',
+                    xsize=xsize)
+
+    hp.graticule()
+    plt.title(
+        f'DDF:{ddfName}, Metric:{mb.metric.name}, RunName:{mb.runName}, Scale:{scale}')
