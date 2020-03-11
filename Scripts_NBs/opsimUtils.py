@@ -313,11 +313,11 @@ def plotSummaryBar(resultDbs, metricName, summaryStatName, runNames=None, **kwar
     plt.title('Bar Chart for Summary Stat: {} of Metric: {}'.format(
         summaryStatName, metricName))
     plt.ylabel('Summary Values')
-    plt.legend(loc=(1.0, 0.2))
+    plt.legend(loc='best')
     fig.tight_layout()
 
 
-def plotHist(bundleDicts, metricKey, runNames=None, **kwargs):
+def plotHist(bundleDicts, metricKey, runNames=None, ddf=False, **kwargs):
     '''
     Plot histogram of evaluated metrics for each opsim in the bundleDicts on
     one figure.
@@ -328,6 +328,7 @@ def plotHist(bundleDicts, metricKey, runNames=None, **kwargs):
             and constraint combination.
         runNames(list): A list of opsim run names from which the metric values use
             to plot histogram are cacluated, default to None, meaning all opsims.
+        ddf(bool): True if plotting for DDF, default is False.
     '''
     # init handler
     ph = plots.PlotHandler(savefig=False)
@@ -338,8 +339,10 @@ def plotHist(bundleDicts, metricKey, runNames=None, **kwargs):
     plotDicts = []
     bundleList = []
 
-    # check if plot for DDF
-    ddf = kwargs.get('ddf')
+    # check if bins provided
+    bins = kwargs.get('bins')
+    if bins is not None:
+        plotDictTemp['bins'] = int(bins)
 
     # loop over all opsims
     if runNames is None:
