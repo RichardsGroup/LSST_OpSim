@@ -30,6 +30,6 @@ order listed below:
 
 **Note:** The `opsimUtils.py` script must be kept in the same directory in which you want to run the notebooks.
 
-Once you are a MAF pro, you can learn more about MAF from [sims_maf_contrib github repo](https://github.com/LSST-nonproject/sims_maf_contrib). For details on the most recent release of LSST cadence simulation, please refer to the [FBS_1.4 thread](https://community.lsst.org/t/january-2020-update-fbs-1-4-runs/4006/6) on LSST Community page. 
+Once you are a MAF pro, you can learn more about MAF from [sims_maf_contrib github repo](https://github.com/LSST-nonproject/sims_maf_contrib). For details on the most recent release of LSST cadence simulation, please refer to the [FBS_1.4 thread](https://community.lsst.org/t/january-2020-update-fbs-1-4-runs/4006/6) and [FBS_1.5 thread](https://community.lsst.org/t/may-update-bonus-fbs-1-5-release/4139) on LSST Community page. 
 
 
