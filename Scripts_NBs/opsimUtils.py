@@ -23,6 +23,12 @@ ddfCoord = {
     '290': (349.5, -63.4)
 }
 
+def show_fbs_dirs():
+    """Show available FBS opsim database directories."""
+    
+    fbs_dirs = glob.glob('/home/idies/workspace/lsst_cadence/FBS_*/')
+    
+    return fbs_dirs
 
 def show_opsims(dbDir):
     '''Show available opsim databases in the provided directory.
