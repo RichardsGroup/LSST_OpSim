@@ -16,11 +16,12 @@ import lsst.sims.maf.db as db
 
 # DDF RA/DEC dict
 ddfCoord = {
-    'COSMOS': (150.10, 2.18),
-    'ELAISS1': (9.45, -44.0),
-    'XMM-LSS': (35.71, -4.75),
-    'ECDFS': (53.13, -28.1),
-    '290': (349.5, -63.4)
+    'COSMOS': (150.11, 2.14),
+    'ELAISS1': (9.487, -44.0),
+    'XMM-LSS': (35.707, -4.72),
+    'ECDFS': (53.15, -28.08),
+    '290': (349.377, -63.32),
+    'EDFS': (61.28, -48.42)
 }
 
 def show_fbs_dirs():
@@ -29,6 +30,7 @@ def show_fbs_dirs():
     fbs_dirs = glob.glob('/home/idies/workspace/lsst_cadence/FBS_*/')
     
     return fbs_dirs
+
 
 def show_opsims(dbDir):
     '''Show available opsim databases in the provided directory.
@@ -42,6 +44,16 @@ def show_opsims(dbDir):
     runNames = [os.path.splitext(os.path.basename(x))[0] for x in db_list]
 
     return runNames
+
+
+def get_ddfNames(opsimdb):
+    """Given an opsim database object, return the DDF field names."""
+    
+    propInfo = opsimdb.fetchPropInfo()
+    DD_Ids = propInfo[1]['DD']
+    
+    DD_names = [propInfo[0][x].split(':')[1] for x in DD_Ids]
+    return DD_names
 
 
 def ddfInfo(opsimdb, ddfName):
