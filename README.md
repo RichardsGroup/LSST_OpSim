@@ -22,14 +22,14 @@ folder. You can begin exploring the simulated cadences using the
 notebooks and scripts provided here. We would suggest following the
 order listed below:
 
-- [Introduction.ipynb](./Scripts_NBs/Introduction.ipynb): A notebook providing a brief overview about how to use MAF.
-- [Multiple_Opsims.ipynb](./Scripts_NBs/Multiple_Opsims.ipynb): A notebook showing how to run some metrics on multiple (all) opsims. 
-- [View_Results.ipynb](./Scripts_NBs/View_Results.ipynb): A notebook showing how to read in the result produced in the notebook above.
-- [wfdFootPrint.ipynb](./Scripts_NBs/wfdFootPrint.ipynb): A notebook showing how to use a custom healpix slicer to run metrics on WFD observations only. Since the Feature-based opsims no longer use fixed tiles, we have get WFD observations through some tricks. For more discussions on this topic, please see [this thread on LSST community.com](https://community.lsst.org/t/wfd-metrics-with-the-fbs-output/3970/7)
-- [DDF_Other_FootPrint.ipynb](./Scripts_NBs/DDF_Other_FootPrint.ipynb): A notebook showing how to run metrics on DDF only or areas that are outside DDF and WFD.
+- [Introduction.ipynb](./Scripts_NBs/00_Introduction.ipynb): A notebook providing a brief overview about how to use MAF.
+- [Multiple_Opsims.ipynb](./Scripts_NBs/01_Multiple_Opsims.ipynb): A notebook showing how to run some metrics on multiple (all) opsims. 
+- [View_Results.ipynb](./Scripts_NBs/02_View_Results.ipynb): A notebook showing how to read in the result produced in the notebook above.
+- [wfdFootPrint.ipynb](./Scripts_NBs/04_wfdFootPrint.ipynb): A notebook showing how to use a custom healpix slicer to run metrics on WFD observations only. Since the Feature-based opsims no longer use fixed tiles, we have get WFD observations through some tricks. For more discussions on this topic, please see [this thread on LSST community.com](https://community.lsst.org/t/wfd-metrics-with-the-fbs-output/3970/7)
+- [DDF_Other_FootPrint.ipynb](./Scripts_NBs/03_DDF_Other_FootPrint.ipynb): A notebook showing how to run metrics on DDF only or areas that are outside DDF and WFD.
 
 **Note:** The `opsimUtils.py` script must be kept in the same directory in which you want to run the notebooks.
 
-Once you are a MAF pro, you can learn more about MAF from [sims_maf_contrib github repo](https://github.com/LSST-nonproject/sims_maf_contrib). For details on the most recent release of LSST cadence simulation, please refer to the [FBS_1.4 thread](https://community.lsst.org/t/january-2020-update-fbs-1-4-runs/4006/6) on LSST Community page. 
+Once you are a MAF pro, you can learn more about MAF from [sims_maf_contrib github repo](https://github.com/LSST-nonproject/sims_maf_contrib). For details on the most recent release of LSST cadence simulation, please refer to the [FBS_1.4 thread](https://community.lsst.org/t/january-2020-update-fbs-1-4-runs/4006/6) and [FBS_1.5 thread](https://community.lsst.org/t/may-update-bonus-fbs-1-5-release/4139) on LSST Community page. 
 
 
