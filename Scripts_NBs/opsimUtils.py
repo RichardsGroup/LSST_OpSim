@@ -194,17 +194,17 @@ def get_metricMetadata(resultDb, metricName=None, metricId=None):
         metricId(int): The ID of a specific metric
 
     Returns:
-        keys(list): A list of tuple dictionary keys.
+        keys: A pandas dataframe listing the requested metadata.
     '''
     metadata = resultDb.getMetricDisplayInfo()
     metadata = metadata[['metricId', 'metricName', 'slicerName', 'sqlConstraint',
                          'metricMetadata', 'metricDataFile']]
     if metricId is not None:
-        return metadata[metadata['metricId'] == metricId]
+        return pd.DataFrame(metadata[metadata['metricId'] == metricId])
     elif metricName is not None:
-        return metadata[metadata['metricName'] == metricName]
+        return pd.DataFrame(metadata[metadata['metricName'] == metricName])
     else:
-        return metadata
+        return pd.DataFrame(metadata)
 
 
 def getSummaryStatNames(resultDb, metricName, metricId=None):
