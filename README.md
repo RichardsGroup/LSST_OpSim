@@ -32,4 +32,7 @@ order listed below:
 
 Once you are a MAF pro, you can learn more about MAF from [sims_maf_contrib github repo](https://github.com/LSST-nonproject/sims_maf_contrib). For details on the most recent release of LSST cadence simulation, please refer to the [FBS_1.4 thread](https://community.lsst.org/t/january-2020-update-fbs-1-4-runs/4006/6) and [FBS_1.5 thread](https://community.lsst.org/t/may-update-bonus-fbs-1-5-release/4139) on LSST Community page. 
 
-
+__Pro tip:__ If you have already walked through all of the notebooks provided above and realize 
+that some code might take forever to run, you can experiment with the SciServer Jobs 
+(which can give you the access to more computing power and memory), here is how to 
+do it -> [SciServer_Jobs](./SciServer_Jobs.pdf). 
