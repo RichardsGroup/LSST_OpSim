@@ -87,7 +87,7 @@ def ddfInfo(opsimdb, ddfName):
         return ddfInfo
 
 
-def connect_dbs(dbDir, outDir):
+def connect_dbs(dbDir, outDir, dbRuns=None):
     """
     Initiate database objects to all opSim databases in the provided directory.
     Returns a dictionary consisting all database connections and a dictionary
@@ -105,9 +105,13 @@ def connect_dbs(dbDir, outDir):
     """
     opSimDbs = {}
     resultDbs = {}
-    dbDir = os.path.abspath(dbDir)
-    db_list = glob.glob(dbDir+'/*.db')
-
+    
+    if dbRuns is None:
+        dbDir = os.path.abspath(dbDir)
+        db_list = glob.glob(dbDir+'/*.db')
+    else:
+        db_list = [os.path.join(dbDir, dbRun+'.db') for dbRun in dbRuns]
+    
     for dbPath in db_list:
         dbName = os.path.basename(dbPath)
         opSimDbs[os.path.splitext(dbName)[0]] = db.OpsimDatabase(dbPath)
