@@ -96,6 +96,7 @@ def connect_dbs(dbDir, outDir, dbRuns=None):
     Args:
         dbDir(str): The path to the dabase directory.
         outDir(str): The path to the result database directory.
+        dbRuns(list): A list of OpSim runs to connect to.
 
     Returns:
         opSimDbs(dict): A dictionary containing the OpsimDatabase objects for
@@ -193,7 +194,7 @@ def get_metricMetadata(resultDb, metricName=None, metricId=None):
     is provided, will show metrics with the provided name/ID only. 
 
     Args:
-        bundleDict(dict): A dictionary bundle of metrics.
+        resultDb(object): The MAF resultDb object.
         metricName(str): The name of a specific metric.
         metricId(int): The ID of a specific metric
 
@@ -236,7 +237,7 @@ def getSummaryStatNames(resultDb, metricName, metricId=None):
         return returnList
 
 
-def getSummary(resultDbs, metricName, summaryStatName, runNames=None, pandas=False, **kwargs):
+def getSummary(resultDbs, metricName, summaryStatName, runNames=None, pandas=True, **kwargs):
     '''
     Return one summary statstic for opsims (included in the resultDbs) on a
     particualr metric given some constraints.
@@ -255,9 +256,12 @@ def getSummary(resultDbs, metricName, summaryStatName, runNames=None, pandas=Fal
             opSim run indicated by the key. This list could has a size > 1, given
             that we can run one metric with different sql constraints.
     '''
+    
     if runNames is None:
         runNames = list(resultDbs.keys())
-
+    elif not (set(runNames) <= set(resultDbs.keys())): 
+        raise Exception("Provided runNames don't match the record!")
+        
     stats = {}
     for run in runNames:
         mIds = resultDbs[run].getMetricId(metricName=metricName, **kwargs)
@@ -298,6 +302,8 @@ def plotSummaryBar(resultDbs, metricName, summaryStatName, runNames=None, **kwar
 
     if runNames is None:
         runNames = list(resultDbs.keys())
+    elif not (set(runNames) <= set(resultDbs.keys())): 
+        raise Exception("Provided runNames don't match the record!")
 
     stats_size = stats[runNames[0]].shape[0]
     x = np.arange(len(runNames))
@@ -361,6 +367,8 @@ def plotSummaryBarh(resultDbs, metricName, summaryStatName, runNames=None, **kwa
 
     if runNames is None:
         runNames = list(resultDbs.keys())
+    elif not (set(runNames) <= set(resultDbs.keys())):        
+        raise Exception("Provided runNames don't match the record!")
 
     stats_size = stats[runNames[0]].shape[0]
     y = np.arange(len(runNames))
@@ -404,7 +412,7 @@ def plotSummaryBarh(resultDbs, metricName, summaryStatName, runNames=None, **kwa
     fig.tight_layout()
 
 
-def plotHist(bundleDicts, metricKey, runNames=None, ddf=False, **kwargs):
+def plotHist(bundleDicts, metricKey, runNames=None, **kwargs):
     '''
     Plot histogram of evaluated metrics for each opsim in the bundleDicts on
     one figure.
@@ -415,36 +423,40 @@ def plotHist(bundleDicts, metricKey, runNames=None, ddf=False, **kwargs):
             and constraint combination.
         runNames(list): A list of opsim run names from which the metric values use
             to plot histogram are cacluated, default to None, meaning all opsims.
-        ddf(bool): True if plotting for DDF, default is False.
     '''
     # init handler
     ph = plots.PlotHandler(savefig=False)
 
     # init plot
     healpixhist = plots.HealpixHistogram()
-    plotDictTemp = {'figsize': (8, 6), 'fontsize': 15, 'labelsize': 13}
+        
+    # option to provide own plotDict for MAF
+    if kwargs.get('plotDict') is not None:
+        plotDictTemp = kwargs.get('plotDict')
+    else:
+        plotDictTemp = {'figsize': (8, 6), 'fontsize': 15, 'labelsize': 13}
+    
+    # check plotting key args
+    if kwargs.get('logScale') is not None: plotDictTemp['logScale'] = kwargs.get('logScale')
+    
     plotDicts = []
     bundleList = []
 
-    # check if bins provided
-    bins = kwargs.get('bins')
-    if bins is not None:
-        plotDictTemp['bins'] = int(bins)
-
+    # match keys
+    metricKeys = key_match(bundleDicts, metricKey)
+    
     # loop over all opsims
     if runNames is None:
         runNames = list(bundleDicts.keys())
-    for runName in runNames:
+     # check if provided runName indeed exists
+    elif not (set(runNames) <= set(bundleDicts.keys())):
+        raise Exception("Provided runNames don't match the record!")
+
+    for runName in runNames:    
         plotDict = plotDictTemp.copy()
         plotDict.update({'label': runName})
         plotDicts.append(plotDict)
-
-        # if plot for ddf, search for key
-        if ddf:
-            keys = [*bundleDicts[runName].keys()]
-            metricKey = [elem for elem in keys if elem[1] == metricKey[1]][0]
-
-        bundleList.append(bundleDicts[runName][metricKey])
+        bundleList.append(bundleDicts[runName][metricKeys[runName]])
 
     # set metrics to plot togehter
     ph.setMetricBundles(bundleList)
@@ -457,7 +469,61 @@ def plotHist(bundleDicts, metricKey, runNames=None, ddf=False, **kwargs):
         plt.axvline(int(vline), color='k', ls='--')
 
 
-def plotSky(bundleDicts, metricKey):
+def key_match(bundleDicts, metricKey, src_run=None, resultDbs=None):
+    """
+    Return metricKeys in all metric bundleDict given a bundleDicts 
+    and a metricKeys from one of the bundleDict. If the metricName is 
+    not unique and the order of metrics is not consistent across all OpSim runs 
+    the name of the source opsim run and the resultDbs dictionary is required.
+    
+    Args:
+        bundleDicts(dict): A dictionary of bundleDict, keys are run names.
+        metricKey(tuple): A tuple dictionary key for a specific metric, slicer 
+            and constraint combination.
+        src_run(str, optional): The opsim run where the provided metricKey come from.
+        resultDbs(dict, optional): The dictionary of resultDbs.
+    
+    Returns:
+        metricKeys(dict): A dictionary of matched metricKey tuple, each is indexed
+            by the runName.
+    """
+    
+    runs = list(bundleDicts.keys())
+    names = [key[1] for key in bundleDicts[runs[1]].keys()]
+    metricKeys = {}
+    
+    # 1st check if keyName unique
+    if (metricKey[1] in names) and (len(names) == len(np.unique(names))):
+        for run in bundleDicts:
+            keys = [*bundleDicts[run].keys()]
+            metricKeys[run] = [elem for elem in keys if elem[1] 
+                               == metricKey[1]][0]
+    
+    # 2nd check if the order persist across all opsim
+    elif bool(map(lambda x: metricKey in x[1].keys(), bundleDicts.items())):
+        for run in bundleDicts:
+            metricKeys[run] = metricKey
+    
+    # if neither above, do the brute force search using resultDbs
+    elif (src_run is not None) and (src_run in runs) and (resultDbs is not None):
+        ref_row = get_metricMetadata(bundleDicts[src_run], metricName=metricKey[1])
+        ref_slicer = ref_row.slicerName.values[0]
+        ref_meta = ref_row.metricMetadata.values[0]
+        
+        for run in bundleDicts:
+            runMeta = resultDbs[run].getMetricDisplayInfo()
+            mask1 = runMeta['slicerName'] == ref_slicer
+            mask2 = runMeta['metricMetadata'] == ref_meta
+            metricId = runMeta['metricId'][mask1 & mask2][0]
+            
+            metricKeys[run] = (metricId, metricKey[1])
+    else:
+        raise Exception('Please provide src_run and resultDbs!')
+
+    return metricKeys
+
+
+def plotSky(bundleDicts, metricKey, **kwargs):
     '''
     Plot healpix skymap for each opSim given a metric. One figure per opSim.
 
@@ -466,12 +532,24 @@ def plotSky(bundleDicts, metricKey):
         metricKey(tuple): A tuple dictionary key for a specific metric, slicer 
             and constraint combination.
     '''
-
+    
+    # init handler, plot, etc.
+    ph = plots.PlotHandler(savefig=False)
     healpixSky = plots.HealpixSkyMap()
+    metricKeys = key_match(bundleDicts, metricKey) # match keys
+    
+    # option to provide own plotDict for MAF
+    if kwargs.get('plotDict') is not None:
+        plotDict = kwargs.get('plotDict')
+    else:
+        plotDict = {}
+           
     for run in bundleDicts:
-        bundleDicts[run][metricKey].plot(plotFunc=healpixSky, savefig=False)
+        ph.setMetricBundles([bundleDicts[run][metricKeys[run]]])
+        ph.plot(plotFunc=healpixSky, plotDicts=plotDict)
 
-
+    
+    
 def plotSky_DDF(mb, ddfName, xsize=250, scale=None):
     '''
     Plot High-Res DDF skymap. 
