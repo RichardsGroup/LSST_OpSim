@@ -237,7 +237,7 @@ def getSummaryStatNames(resultDb, metricName, metricId=None):
         return returnList
 
 
-def getSummary(resultDbs, metricName, summaryStatName, runNames=None, pandas=False, **kwargs):
+def getSummary(resultDbs, metricName, summaryStatName, runNames=None, pandas=True, **kwargs):
     '''
     Return one summary statstic for opsims (included in the resultDbs) on a
     particualr metric given some constraints.
@@ -256,9 +256,12 @@ def getSummary(resultDbs, metricName, summaryStatName, runNames=None, pandas=Fal
             opSim run indicated by the key. This list could has a size > 1, given
             that we can run one metric with different sql constraints.
     '''
+    
     if runNames is None:
         runNames = list(resultDbs.keys())
-
+    elif not (set(runNames) <= set(resultDbs.keys())): 
+        raise Exception("Provided runNames don't match the record!")
+        
     stats = {}
     for run in runNames:
         mIds = resultDbs[run].getMetricId(metricName=metricName, **kwargs)
@@ -299,6 +302,8 @@ def plotSummaryBar(resultDbs, metricName, summaryStatName, runNames=None, **kwar
 
     if runNames is None:
         runNames = list(resultDbs.keys())
+    elif not (set(runNames) <= set(resultDbs.keys())): 
+        raise Exception("Provided runNames don't match the record!")
 
     stats_size = stats[runNames[0]].shape[0]
     x = np.arange(len(runNames))
@@ -362,6 +367,8 @@ def plotSummaryBarh(resultDbs, metricName, summaryStatName, runNames=None, **kwa
 
     if runNames is None:
         runNames = list(resultDbs.keys())
+    elif not (set(runNames) <= set(resultDbs.keys())):        
+        raise Exception("Provided runNames don't match the record!")
 
     stats_size = stats[runNames[0]].shape[0]
     y = np.arange(len(runNames))
@@ -435,19 +442,17 @@ def plotHist(bundleDicts, metricKey, runNames=None, **kwargs):
     plotDicts = []
     bundleList = []
 
-
     # match keys
     metricKeys = key_match(bundleDicts, metricKey)
     
     # loop over all opsims
     if runNames is None:
         runNames = list(bundleDicts.keys())
-    for runName in runNames:
-        
-        # check if provided runName indeed exists
-        if runName not in list(bundleDicts.keys()):
-            raise Exception(f'Opsim run:{runName} not in the bundleDicts!')
-            
+     # check if provided runName indeed exists
+    elif not (set(runNames) <= set(bundleDicts.keys())):
+        raise Exception("Provided runNames don't match the record!")
+
+    for runName in runNames:    
         plotDict = plotDictTemp.copy()
         plotDict.update({'label': runName})
         plotDicts.append(plotDict)
@@ -476,7 +481,11 @@ def key_match(bundleDicts, metricKey, src_run=None, resultDbs=None):
         metricKey(tuple): A tuple dictionary key for a specific metric, slicer 
             and constraint combination.
         src_run(str, optional): The opsim run where the provided metricKey come from.
-        resultDbs(dict, optional): The dictionary of resultDbs
+        resultDbs(dict, optional): The dictionary of resultDbs.
+    
+    Returns:
+        metricKeys(dict): A dictionary of matched metricKey tuple, each is indexed
+            by the runName.
     """
     
     runs = list(bundleDicts.keys())
