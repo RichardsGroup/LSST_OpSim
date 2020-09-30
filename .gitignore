@@ -1,3 +1,7 @@
+# contrib folder
+contrib/opsimUtils.py
+contrib/dask-worker-space/
+
 # code testing
 */CodeTest.ipynb
 /TestNbs/*
