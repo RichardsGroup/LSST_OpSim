@@ -298,7 +298,7 @@ def plotSummaryBar(resultDbs, metricName, summaryStatName, runNames=None, **kwar
     rcParams['axes.titlepad'] = 10
 
     stats = getSummary(resultDbs, metricName,
-                       summaryStatName, runNames)
+                       summaryStatName, runNames, pandas=False)
 
     if runNames is None:
         runNames = list(resultDbs.keys())
@@ -363,7 +363,7 @@ def plotSummaryBarh(resultDbs, metricName, summaryStatName, runNames=None, **kwa
     rcParams['axes.titlepad'] = 10
 
     stats = getSummary(resultDbs, metricName,
-                       summaryStatName, runNames)
+                       summaryStatName, runNames, pandas=False)
 
     if runNames is None:
         runNames = list(resultDbs.keys())
