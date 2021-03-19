@@ -82,7 +82,7 @@ def ddfInfo(opsimdb, ddfName):
         ddfInfo = {}
         propInfo = opsimdb.fetchPropInfo()[0]
         ddfInfo['proposalId'] = [key for key, elem in propInfo.items() if
-                                 elem[3:3+len(ddfName)] == '{}'.format(ddfName)]
+                                 ddfName in elem]
         ddfInfo['Coord'] = ddfCoord[ddfName]
         return ddfInfo
 
