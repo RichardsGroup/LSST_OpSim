@@ -503,7 +503,7 @@ def key_match(bundleDicts, metricKey, src_run=None, resultDbs=None):
             metricKeys[run] = None
         
         # 1st check if keyName unique
-        if (len(names) == len(np.unique(names))):
+        elif (len(names) == len(np.unique(names))):
             keys = [*bundleDicts[run].keys()]
             metricKeys[run] = [elem for elem in keys if elem[1] 
                                == metricKey[1]][0]
