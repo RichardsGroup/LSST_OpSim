@@ -442,13 +442,14 @@ def plotHist(bundleDicts, metricKey, runNames=None, **kwargs):
     plotDicts = []
     bundleList = []
 
-    # match keys
+    # match keys & remove none
     metricKeys = key_match(bundleDicts, metricKey)
+    metricKeys = {key:value for (key, value) in metricKeys.items() if value is not None}
     
     # loop over all opsims
     if runNames is None:
-        runNames = list(bundleDicts.keys())
-     # check if provided runName indeed exists
+        runNames = list(metricKeys.keys())
+    # check if provided runName indeed exists
     elif not (set(runNames) <= set(bundleDicts.keys())):
         raise Exception("Provided runNames don't match the record!")
 
@@ -489,36 +490,43 @@ def key_match(bundleDicts, metricKey, src_run=None, resultDbs=None):
     """
     
     runs = list(bundleDicts.keys())
-    names = [key[1] for key in bundleDicts[runs[1]].keys()]
     metricKeys = {}
     
-    # 1st check if keyName unique
-    if (metricKey[1] in names) and (len(names) == len(np.unique(names))):
-        for run in bundleDicts:
+    for run in bundleDicts:
+        
+        # metircNames in the current run
+        names = [key[1] for key in bundleDicts[run].keys()]
+        
+        # if not available, assign none
+        if not metricKey[1] in names:
+            print(f'No matching metric found in run: {run}! Assigned None.')
+            metricKeys[run] = None
+        
+        # 1st check if keyName unique
+        if (len(names) == len(np.unique(names))):
             keys = [*bundleDicts[run].keys()]
             metricKeys[run] = [elem for elem in keys if elem[1] 
                                == metricKey[1]][0]
-    
-    # 2nd check if the order persist across all opsim
-    elif bool(map(lambda x: metricKey in x[1].keys(), bundleDicts.items())):
-        for run in bundleDicts:
+
+        # 2nd check if the order persist across all opsim
+        elif all(list(map(lambda x: metricKey in x[1].keys(), bundleDicts.items()))):
             metricKeys[run] = metricKey
-    
-    # if neither above, do the brute force search using resultDbs
-    elif (src_run is not None) and (src_run in runs) and (resultDbs is not None):
-        ref_row = get_metricMetadata(bundleDicts[src_run], metricName=metricKey[1])
-        ref_slicer = ref_row.slicerName.values[0]
-        ref_meta = ref_row.metricMetadata.values[0]
-        
-        for run in bundleDicts:
+
+        # if neither above, do the brute force search using resultDbs
+        elif (src_run is not None) and (src_run in runs) and (resultDbs is not None):
+            ref_row = get_metricMetadata(bundleDicts[src_run], metricName=metricKey[1])
+            ref_slicer = ref_row.slicerName.values[0]
+            ref_meta = ref_row.metricMetadata.values[0]
+
             runMeta = resultDbs[run].getMetricDisplayInfo()
             mask1 = runMeta['slicerName'] == ref_slicer
             mask2 = runMeta['metricMetadata'] == ref_meta
             metricId = runMeta['metricId'][mask1 & mask2][0]
-            
+
             metricKeys[run] = (metricId, metricKey[1])
-    else:
-        raise Exception('Please provide src_run and resultDbs!')
+
+        else:
+            raise Exception("Can't locate a match with the given information!")
 
     return metricKeys
 
@@ -537,6 +545,7 @@ def plotSky(bundleDicts, metricKey, **kwargs):
     ph = plots.PlotHandler(savefig=False)
     healpixSky = plots.HealpixSkyMap()
     metricKeys = key_match(bundleDicts, metricKey) # match keys
+    metricKeys = {key:value for (key, value) in metricKeys.items() if value is not None}
     
     # option to provide own plotDict for MAF
     if kwargs.get('plotDict') is not None:
@@ -544,7 +553,7 @@ def plotSky(bundleDicts, metricKey, **kwargs):
     else:
         plotDict = {}
            
-    for run in bundleDicts:
+    for run in metricKeys.keys():
         ph.setMetricBundles([bundleDicts[run][metricKeys[run]]])
         ph.plot(plotFunc=healpixSky, plotDicts=plotDict)
 
