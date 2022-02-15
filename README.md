@@ -10,14 +10,39 @@ provided here within the infrastructure provided by the SciServer
 team. This project is led by Weixiang Yu and Dr. Gordon Richards at
 Drexel University, with extensive help from the SciServer team.
 
-### Setup
+## Setup
 The instructions on how to create an account on
 [SciServer](http://www.sciserver.org/), create a container with the
 necessary software installed and the cadence volume mounted can be
 found in [sciserver_opsim.pdf](./sciserver_opsim.pdf)
 
-### Getting Started
-Once you have finished the setup, clone this repo to your "persistent"
+### Installing $\texttt{rubin_sim}$ 
+This section is added following the release of a new $\texttt{rubin_sim}$ Python package for running MAF (and other survey simulation tasks) on simulated LSST surveys. $\texttt{rubin_sim}$ replaces the old tools that had required the LSST Stack to be functional. Note that the instructions provided here are for running $\texttt{rubin_sim}$ on SciServer only. A more general-purpose installation instruction of $\texttt{rubin_sim}$ is avaiable at the original [rubin_sim repository](https://github.com/lsst/rubin_sim).
+
+1. Navigate to your `persistent` folder at '/home/idies/workspace/Storage/{your_username}/persistent' from the termimal.
+2. Clone the $\texttt{rubin_sim}$ repository and install from source:
+
+```sh
+    git clone https://github.com/lsst/rubin_sim.git
+    cd rubin_sim
+    conda create -n rubin
+    conda activate rubin
+    conda install -c conda-forge --file=requirements.txt
+    pip install e .
+    ln -s ~/workspace/lsst_cadences/FBS_2.0_v2/ ~/rubin_sim_data ### tell rubin_sim where to find data
+```
+
+3. Install and create an ipython kernel for the `rubin` conda environment
+
+```sh
+    conda install ipykernel
+    python -m ipykernel install --user --name rubin --display-name "rubin"
+```
+
+From now on, the $\texttt{rubin_sim}$ package should be accessible in both a script and a notebook (you need to select the "rubin" kernel in the notebook interface). 
+
+## Getting Started
+Once you have finished the setup, clone this repo to your `persistent`
 folder. You can begin exploring the simulated cadences using the
 notebooks and scripts provided here. We would suggest following the
 order listed below:
@@ -30,8 +55,8 @@ order listed below:
 
 **Note:** The `opsimUtils.py` script must be kept in the same directory in which you want to run the notebooks.
 
-Once you are a MAF pro, you can learn more about MAF from [sims_maf_contrib github repo](https://github.com/LSST-nonproject/sims_maf_contrib). For details on the most recent release of LSST cadence simulation, please refer to the [FBS_1.4 thread](https://community.lsst.org/t/january-2020-update-fbs-1-4-runs/4006/6), [FBS_1.5 thread](https://community.lsst.org/t/may-update-bonus-fbs-1-5-release/4139), [FBS_1.6 thread](https://community.lsst.org/t/fbs-1-6-release-august-2020/4423) and [FBS_1.7 thread](https://community.lsst.org/t/survey-simulations-v1-7-release-january-2021/4660) on LSST Community page. (Note that FBS 1.4 simulations have been superceded by runs in 1.5, 1.6 or 1.7, the link above is only for reference purpose.)
-
+<!-- Once you are a MAF pro, you can learn more about MAF from [sims_maf_contrib github repo](https://github.com/LSST-nonproject/sims_maf_contrib). For details on the most recent release of LSST cadence simulation, please refer to the [FBS_1.4 thread](https://community.lsst.org/t/january-2020-update-fbs-1-4-runs/4006/6), [FBS_1.5 thread](https://community.lsst.org/t/may-update-bonus-fbs-1-5-release/4139), [FBS_1.6 thread](https://community.lsst.org/t/fbs-1-6-release-august-2020/4423) and [FBS_1.7 thread](https://community.lsst.org/t/survey-simulations-v1-7-release-january-2021/4660) on LSST Community page. (Note that FBS 1.4 simulations have been superceded by runs in 1.5, 1.6 or 1.7, the link above is only for reference purpose.)
+ -->
 __Other useful resources:__
 - A [summary/cheetsheet](https://github.com/lsst-pst/pstn-051/blob/master/Cheat_Sheet.md) (by Lynne Jones) of cadence simulations that are currently available.
 - Columns in the OpSim databas -> [here](https://github.com/lsst/sims_featureScheduler)
