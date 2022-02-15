@@ -20,7 +20,7 @@ found in [sciserver_opsim.pdf](./sciserver_opsim.pdf)
 This section is added following the release of a new **rubin_sim** Python package for running MAF (and other survey simulation tasks) on simulated LSST surveys. **rubin_sim** replaces the old tools that had required the LSST Stack to be functional. Note that the instructions provided here are for running **rubin_sim** on SciServer only. A more general-purpose installation instruction of **rubin_sim** is avaiable at the original [rubin_sim repository](https://github.com/lsst/rubin_sim).
 
 1. Navigate to your `persistent` folder at '/home/idies/workspace/Storage/{your_username}/persistent' from the termimal.
-2. Clone the $\texttt{rubin_sim}$ repository and install from source:
+2. Clone the **rubin_sim** repository and install from source:
 
 ```sh
     git clone https://github.com/lsst/rubin_sim.git
