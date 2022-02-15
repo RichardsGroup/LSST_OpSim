@@ -16,8 +16,8 @@ The instructions on how to create an account on
 necessary software installed and the cadence volume mounted can be
 found in [sciserver_opsim.pdf](./sciserver_opsim.pdf)
 
-### Installing $\texttt{rubin_sim}$ 
-This section is added following the release of a new $\texttt{rubin_sim}$ Python package for running MAF (and other survey simulation tasks) on simulated LSST surveys. $\texttt{rubin_sim}$ replaces the old tools that had required the LSST Stack to be functional. Note that the instructions provided here are for running $\texttt{rubin_sim}$ on SciServer only. A more general-purpose installation instruction of $\texttt{rubin_sim}$ is avaiable at the original [rubin_sim repository](https://github.com/lsst/rubin_sim).
+### Installing **rubin_sim** 
+This section is added following the release of a new **rubin_sim** Python package for running MAF (and other survey simulation tasks) on simulated LSST surveys. **rubin_sim** replaces the old tools that had required the LSST Stack to be functional. Note that the instructions provided here are for running **rubin_sim** on SciServer only. A more general-purpose installation instruction of **rubin_sim** is avaiable at the original [rubin_sim repository](https://github.com/lsst/rubin_sim).
 
 1. Navigate to your `persistent` folder at '/home/idies/workspace/Storage/{your_username}/persistent' from the termimal.
 2. Clone the $\texttt{rubin_sim}$ repository and install from source:
@@ -39,7 +39,7 @@ This section is added following the release of a new $\texttt{rubin_sim}$ Python
     python -m ipykernel install --user --name rubin --display-name "rubin"
 ```
 
-From now on, the $\texttt{rubin_sim}$ package should be accessible in both a script and a notebook (you need to select the "rubin" kernel in the notebook interface). 
+From now on, the **rubin_sim** package should be accessible in both a script and a notebook (you need to select the "rubin" kernel in the notebook interface). 
 
 ## Getting Started
 Once you have finished the setup, clone this repo to your `persistent`
