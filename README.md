@@ -17,9 +17,9 @@ necessary software installed and the cadence volume mounted can be
 found in [sciserver_opsim.pdf](./sciserver_opsim.pdf)
 
 ### Installing **rubin_sim** 
-This section is added following the release of a new **rubin_sim** Python package for running MAF on simulated LSST surveys and performing other survey simulation tasks. **rubin_sim** replaces the old tools that require the LSST Stack to be functional. Note that the instructions provided here are for running **rubin_sim** on SciServer only. A more general-purpose installation instruction of **rubin_sim** is avaiable at the original [rubin_sim github repository](https://github.com/lsst/rubin_sim). You can follow the steps below to install **rubin_sim**.
+This section is added following the release of a new **rubin_sim** Python package for running MAF on simulated LSST surveys and performing other survey simulation tasks. **rubin_sim** replaces the old tools that require the LSST Stack to be functional. Note that the instructions provided here are for running **rubin_sim** on SciServer only. A more general-purpose installation instruction of **rubin_sim** is available at the original [rubin_sim github repository](https://github.com/lsst/rubin_sim). You can follow the steps below to install **rubin_sim**.
 
-1. Navigate to your `persistent` folder at '/home/idies/workspace/Storage/{your_username}/persistent' from the termimal.
+1. Navigate to your `persistent` folder at '/home/idies/workspace/Storage/{your_username}/persistent' from the terminal.
 2. Clone the **rubin_sim** repository and install from source:
 
 ```sh
@@ -52,7 +52,7 @@ order listed below:
 - [View_Results.ipynb](./Scripts_NBs/02_View_Results.ipynb): A notebook showing how to read in the result produced in the notebook above.
 - [wfdFootPrint.ipynb](./Scripts_NBs/04_wfdFootPrint.ipynb): A notebook showing how to use a custom healpix slicer to run metrics on WFD observations only. Since the Feature-based opsims no longer use fixed tiles, we have get WFD observations through some tricks. For more discussions on this topic, please see [this thread on LSST community.com](https://community.lsst.org/t/wfd-metrics-with-the-fbs-output/3970/7)
 - [DDF_Other_FootPrint.ipynb](./Scripts_NBs/03_DDF_Other_FootPrint.ipynb): A notebook showing how to run metrics on DDF only or areas that are outside DDF and WFD.
-- [rubin_sim_notebooks](./rubin_sim_notebooks/maf_tutorial): A collection of MAF tutorial notebooks provided by the Rubin Project Team. These notebooks have been modified slightly to accomdate the latest **rubin_sim** API.
+- [rubin_sim_notebooks](./rubin_sim_notebooks/maf_tutorial): A collection of MAF tutorial notebooks provided by the Rubin Project Team. These notebooks have been modified slightly to accommodate the latest **rubin_sim** API.
 
 **Note:** The `opsimUtils.py` script must be kept in the same directory in which you want to run the notebooks.
 
