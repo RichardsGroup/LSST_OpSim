@@ -60,7 +60,7 @@ order listed below:
  -->
 #### Useful resources:
 - A [summary/cheetsheet](https://github.com/lsst-pst/pstn-051/blob/master/Cheat_Sheet.md) (by Lynne Jones) of cadence simulations that are currently available.
-- Columns in the OpSim databas -> [here](https://github.com/lsst/sims_featureScheduler)
+- Columns in the OpSim database -> [here](https://github.com/lsst/sims_featureScheduler)
 - A high-level comparison/description of various simulation groups/families (across FBS 1.5, 1.6 and 1.7)-> [here](https://github.com/lsst-pst/survey_strategy/blob/master/fbs_1.7/SummaryInfo.ipynb)
 
 <br>
