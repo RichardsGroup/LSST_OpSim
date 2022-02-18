@@ -3,16 +3,23 @@ import os
 import numpy as np
 import pandas as pd
 import healpy as hp
+import sqlite3
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
+from os.path import splitext, basename
 
-# import lsst.sims.maf python modules
-import lsst.sims.maf.metricBundles as metricBundles
-import lsst.sims.maf.plots as plots
-import lsst.sims.maf.stackers as stackers
-import lsst.sims.maf.slicers as slicers
-import lsst.sims.maf.metrics as metrics
-import lsst.sims.maf.db as db
+# import rubin_sim.maf python modules
+import rubin_sim.maf.metricBundles as metricBundles
+import rubin_sim.maf.plots as plots
+import rubin_sim.maf.stackers as stackers
+import rubin_sim.maf.slicers as slicers
+import rubin_sim.maf.metrics as metrics
+import rubin_sim.maf.db as db
+import rubin_sim
+
+# pre-load run information
+run_df = rubin_sim.maf.get_runs()
+dbDir = rubin_sim.data.get_data_dir()
 
 # DDF RA/DEC dict
 ddfCoord = {
@@ -21,6 +28,7 @@ ddfCoord = {
     'XMM-LSS': (35.707, -4.72),
     'ECDFS': (53.15, -28.08),
     '290': (349.377, -63.32),
+    'EDFS, b': (61.28, -48.42),
     'EDFS': (61.28, -48.42)
 }
 
@@ -32,27 +40,40 @@ def show_fbs_dirs():
     return fbs_dirs
 
 
-def show_opsims(dbDir):
-    '''Show available opsim databases in the provided directory.
-
+def fetchPropInfo(dbPath):
+    """Get proposal info directly from the sqlite database.
+    
     Args:
-        dbDir(str): The path the database directory.
-    '''
-
-    dbDir = os.path.abspath(dbDir)
-    db_list = glob.glob(dbDir+'/*.db')
-    runNames = [os.path.splitext(os.path.basename(x))[0] for x in db_list]
-
-    return runNames
-
-
+        dbPath(str): Full path to the opsim sqlite database.
+    """
+    
+    try:
+        con = sqlite3.connect(dbPath)
+        cursor = con.cursor()
+    except Exception as e:
+        print(f'fetchPropInfo: {e}')
+    
+    # get tables
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    tables = cursor.fetchall()
+    
+    if ('Proposal',) in tables:
+        cursor.execute('Select * from Proposal;')
+        propInfo = cursor.fetchall()
+        return propInfo
+    else:
+        print('Proposal infomation not found in database!')
+        return None
+    
+    
 def get_ddfNames(opsimdb):
     """Given an opsim database object, return the DDF field names."""
     
-    propInfo = opsimdb.fetchPropInfo()
-    DD_Ids = propInfo[1]['DD']
+#     dbPath = os.path.join(dbDir, run_df.loc[opsimdb, 'filepath'])
+    propInfo = fetchPropInfo(opsimdb)
+    DD_Ids = [prop[0] for prop in propInfo if prop[2] == 'DD']
     
-    DD_names = [propInfo[0][x].split(':')[1] for x in DD_Ids]
+    DD_names = [propInfo[x][1].split(':')[1] for x in DD_Ids]
     return DD_names
 
 
@@ -70,19 +91,20 @@ def ddfInfo(opsimdb, ddfName):
     """
 
     ddfName = str(ddfName)
+    propInfo = fetchPropInfo(opsimdb)
+    DD_Ids = [prop[0] for prop in propInfo if prop[2] == 'DD']
 
     if ddfName not in ddfCoord.keys():
         print('DDF name provided is not correct! Please use one of the below: \n')
         print(list(ddfCoord.keys()))
         return None
-    elif len(opsimdb.fetchPropInfo()[1]['DD']) == 0:
+    elif len(DD_Ids) == 0:
         print('No DDF in this Opsim run!')
         return None
     else:
         ddfInfo = {}
-        propInfo = opsimdb.fetchPropInfo()[0]
-        ddfInfo['proposalId'] = [key for key, elem in propInfo.items() if
-                                 ddfName in elem]
+        ddfInfo['proposalId'] = [prop[0] for prop in propInfo 
+                                 if ddfName in prop[1]][0]
         ddfInfo['Coord'] = ddfCoord[ddfName]
         return ddfInfo
 
@@ -108,19 +130,17 @@ def connect_dbs(dbDir, outDir, dbRuns=None):
     resultDbs = {}
     
     if dbRuns is None:
-        dbDir = os.path.abspath(dbDir)
-        db_list = glob.glob(dbDir+'/*.db')
+        dbPaths = run_df.filepath
     else:
-        db_list = [os.path.join(dbDir, dbRun+'.db') for dbRun in dbRuns]
+        dbPaths = run_df.filepath[dbRuns]
     
-    for dbPath in db_list:
-        dbName = os.path.basename(dbPath)
-        opSimDbs[os.path.splitext(dbName)[0]] = db.OpsimDatabase(dbPath)
-        resultDbs[os.path.splitext(dbName)[0]] = \
-            db.ResultsDb(outDir=outDir,
-                         database=os.path.splitext(dbName)[0]+'_result.db')
+    for dbPath in dbPaths:
+        dbName = splitext(basename(dbPath))[0]
+        dbPath = os.path.join(dbDir, dbPath)
+        opSimDbs[dbName] = db.OpsimDatabase(dbPath)
+        resultDbs[dbName] = db.ResultsDb(outDir=outDir, 
+                                        database=dbName +'_result.db')
     return (opSimDbs, resultDbs)
-
 
 def getResultsDbs(resultDbPath):
     """Create a dictionary of resultDb from resultDb files
