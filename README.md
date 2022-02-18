@@ -29,7 +29,7 @@ This section is added following the release of a new **rubin_sim** Python packag
     conda activate rubin
     conda install -c conda-forge --file=requirements.txt -y
     pip install e .
-    ln -s ~/workspace/lsst_cadences/FBS_2.0_v2/ ~/rubin_sim_data # tell rubin_sim where to find data
+    ln -s ~/workspace/lsst_cadence/FBS_2.0_v2/ ~/rubin_sim_data # tell rubin_sim where to find data
 ```
 
 3. Install and create an ipython kernel for the `rubin` conda environment
