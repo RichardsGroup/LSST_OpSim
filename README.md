@@ -25,9 +25,9 @@ This section is added following the release of a new **rubin_sim** Python packag
 ```sh
     git clone https://github.com/lsst/rubin_sim.git
     cd rubin_sim
-    conda create -n rubin
+    conda create -n rubin -y
     conda activate rubin
-    conda install -c conda-forge --file=requirements.txt
+    conda install -c conda-forge --file=requirements.txt -y
     pip install e .
     ln -s ~/workspace/lsst_cadences/FBS_2.0_v2/ ~/rubin_sim_data # tell rubin_sim where to find data
 ```
@@ -35,7 +35,7 @@ This section is added following the release of a new **rubin_sim** Python packag
 3. Install and create an ipython kernel for the `rubin` conda environment
 
 ```sh
-    conda install ipykernel
+    conda install ipykernel -y
     python -m ipykernel install --user --name rubin --display-name "rubin"
 ```
 
