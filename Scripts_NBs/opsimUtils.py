@@ -40,6 +40,11 @@ def show_fbs_dirs():
     return fbs_dirs
 
 
+def show_opsims():
+    """Return a list of opsim runs in the current version."""
+    return run_df.index.values
+
+    
 def fetchPropInfo(dbPath):
     """Get proposal info directly from the sqlite database.
     
@@ -134,12 +139,12 @@ def connect_dbs(dbDir, outDir, dbRuns=None):
     else:
         dbPaths = run_df.filepath[dbRuns]
     
-    for dbPath in dbPaths:
-        dbName = splitext(basename(dbPath))[0]
+    for i, dbPath in enumerate(dbPaths):
+        dbName = dbRuns[i]
         dbPath = os.path.join(dbDir, dbPath)
         opSimDbs[dbName] = db.OpsimDatabase(dbPath)
         resultDbs[dbName] = db.ResultsDb(outDir=outDir, 
-                                        database=dbName +'_result.db')
+                                         database=dbName +'_result.db')
     return (opSimDbs, resultDbs)
 
 def getResultsDbs(resultDbPath):
