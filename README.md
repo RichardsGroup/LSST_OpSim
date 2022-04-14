@@ -1,4 +1,6 @@
-# LSST_OpSim 
+# LSST_OpSim
+### << **This branch is archived. The `rubin_sim` branch is not the default.** <<
+
 The repo provides instructions, notebooks, and scripts to help people
 getting started with testing LSST cadence simulations hosted on
 [SciServer](http://www.sciserver.org/). This work was initiated to
