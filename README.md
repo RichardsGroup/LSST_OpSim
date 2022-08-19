@@ -29,7 +29,7 @@ This section is added following the release of a new **rubin_sim** Python packag
     conda activate rubin
     conda install -c conda-forge --file=requirements.txt -y
     pip install e .
-    ln -s ~/workspace/lsst_cadence/FBS_2.0_v2/ ~/rubin_sim_data # tell rubin_sim where to find data
+    ln -nsf ~/workspace/lsst_cadence/fbs2/ ~/rubin_sim_data # tell rubin_sim where to find data
 ```
 
 3. Install and create an ipython kernel for the `rubin` conda environment
@@ -40,6 +40,9 @@ This section is added following the release of a new **rubin_sim** Python packag
 ```
 
 From now on, the **rubin_sim** package should be accessible in both a script and a notebook (you need to select the "rubin" kernel in the notebook interface). 
+
+#### **Note:** 
+If a link of `~/rubin_sim_data` already exists, please remove it and create a new one.
 
 ## Getting Started
 Once you have finished the setup, clone this repo to your `persistent`
@@ -54,7 +57,7 @@ order listed below:
 - [DDF_Other_FootPrint.ipynb](./Scripts_NBs/03_DDF_Other_FootPrint.ipynb): A notebook showing how to run metrics on DDF only or areas that are outside DDF and WFD.
 - [rubin_sim_notebooks](./rubin_sim_notebooks/maf_tutorial): A collection of MAF tutorial notebooks provided by the Rubin Project Team. These notebooks have been modified slightly to accommodate the latest **rubin_sim** API.
 
-**Note:** The `opsimUtils.py` script must be kept in the same directory in which you want to run the notebooks.
+**Note:** The `opsimUtils.py` script must be kept in the same directory in which you want to run the notebooks. This file is also constantly updated to match the schema changes in the newer opsims. 
 
 <!-- Once you are a MAF pro, you can learn more about MAF from [sims_maf_contrib github repo](https://github.com/LSST-nonproject/sims_maf_contrib). For details on the most recent release of LSST cadence simulation, please refer to the [FBS_1.4 thread](https://community.lsst.org/t/january-2020-update-fbs-1-4-runs/4006/6), [FBS_1.5 thread](https://community.lsst.org/t/may-update-bonus-fbs-1-5-release/4139), [FBS_1.6 thread](https://community.lsst.org/t/fbs-1-6-release-august-2020/4423) and [FBS_1.7 thread](https://community.lsst.org/t/survey-simulations-v1-7-release-january-2021/4660) on LSST Community page. (Note that FBS 1.4 simulations have been superceded by runs in 1.5, 1.6 or 1.7, the link above is only for reference purpose.)
  -->

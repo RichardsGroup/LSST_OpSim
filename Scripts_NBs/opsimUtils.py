@@ -15,11 +15,13 @@ import rubin_sim.maf.stackers as stackers
 import rubin_sim.maf.slicers as slicers
 import rubin_sim.maf.metrics as metrics
 import rubin_sim.maf.db as db
+import rubin_sim.utils as rs_utils
 import rubin_sim
+
 
 # pre-load run information
 run_df = rubin_sim.maf.get_runs()
-dbDir = rubin_sim.data.get_data_dir()
+dataDir = rubin_sim.data.get_data_dir()
 
 # DDF RA/DEC dict
 ddfCoord = {
@@ -27,8 +29,8 @@ ddfCoord = {
     'ELAISS1': (9.487, -44.0),
     'XMM-LSS': (35.707, -4.72),
     'ECDFS': (53.15, -28.08),
-    '290': (349.377, -63.32),
-    'EDFS, b': (61.28, -48.42),
+    'EDFS_a': (58.9, -49.315),
+    'EDFS_b': (63.6, -47.6),
     'EDFS': (61.28, -48.42)
 }
 
@@ -113,15 +115,46 @@ def ddfInfo(opsimdb, ddfName):
         ddfInfo['Coord'] = ddfCoord[ddfName]
         return ddfInfo
 
+def _set_circular_region(ra_center, dec_center, radius, nside=64):
+    """function to specify a circular footprint"""
+    
+    # find the healpixels that cover a circle of radius radius around ra/dec center (deg)
+    ra, dec = hp.pix2ang(nside, np.arange(hp.nside2npix(nside)), 
+                         lonlat=True)
+    result = np.zeros(len(ra))
+    distance = rs_utils._angularSeparation(np.radians(ra_center), 
+                                           np.radians(dec_center),
+                                           np.radians(ra), np.radians(dec))
+    result[np.where(distance < np.radians(radius))] = 1
+    return result
 
-def connect_dbs(dbDir, outDir, dbRuns=None):
+
+def ddf_hp_mask(ddfName, radius, nside):
+    """
+    Create a healpix slicer for a given DDF.
+    
+    Args:
+        ddfName(str): Name of the DDF.
+        radius(float): Raidus of the circular footprint in degree.
+        nside(int): Healpix nside.
+    """
+    
+    try:
+        ra, dec = ddfCoord[ddfName]
+    except:
+        raise('DDF not in list!')
+    
+    return _set_circular_region(ra, dec, radius, nside)
+
+
+def connect_dbs(dataDir, outDir, dbRuns=None):
     """
     Initiate database objects to all opSim databases in the provided directory.
     Returns a dictionary consisting all database connections and a dictionary
     holding the resultsDb objects.
 
     Args:
-        dbDir(str): The path to the dabase directory.
+        dataDir(str): The path to the rubin_sim data directory.
         outDir(str): The path to the result database directory.
         dbRuns(list): A list of OpSim runs to connect to.
 
@@ -135,13 +168,11 @@ def connect_dbs(dbDir, outDir, dbRuns=None):
     resultDbs = {}
     
     if dbRuns is None:
-        dbPaths = run_df.filepath
-    else:
-        dbPaths = run_df.filepath[dbRuns]
-    
-    for i, dbPath in enumerate(dbPaths):
-        dbName = dbRuns[i]
-        dbPath = os.path.join(dbDir, dbPath)
+        dbRuns = list(run_df.index)
+
+    for i, dbRun in enumerate(dbRuns):
+        dbName = dbRun
+        dbPath = os.path.join(dataDir, 'sim_dbs', f'{dbRun}.db')
         opSimDbs[dbName] = db.OpsimDatabase(dbPath)
         resultDbs[dbName] = db.ResultsDb(outDir=outDir, 
                                          database=dbName +'_result.db')
@@ -228,7 +259,7 @@ def get_metricMetadata(resultDb, metricName=None, metricId=None):
     '''
     metadata = resultDb.getMetricDisplayInfo()
     metadata = metadata[['metricId', 'metricName', 'slicerName', 'sqlConstraint',
-                         'metricMetadata', 'metricDataFile']]
+                         'metricInfoLabel', 'metricDataFile']]
     if metricId is not None:
         return pd.DataFrame(metadata[metadata['metricId'] == metricId])
     elif metricName is not None:
@@ -339,7 +370,7 @@ def plotSummaryBar(resultDbs, metricName, summaryStatName, runNames=None, **kwar
     for i in range(stats_size):
         label = '{}_{}_{}'.format(
             metricName, stats[runNames[0]]['slicerName'][i],
-                stats[runNames[0]]['metricMetadata'][i])
+                stats[runNames[0]]['metricInfoLabel'][i])
         summaryValues = []
 
         if stats_size == 1:
@@ -406,7 +437,7 @@ def plotSummaryBarh(resultDbs, metricName, summaryStatName, runNames=None, **kwa
     for i in range(stats_size):
         label = '{}_{}_{}'.format(
             metricName, stats[runNames[0]]['slicerName'][i],
-                stats[runNames[0]]['metricMetadata'][i])
+                stats[runNames[0]]['metricInfoLabel'][i])
         summaryValues = []
 
         if stats_size == 1:
@@ -468,7 +499,7 @@ def plotHist(bundleDicts, metricKey, runNames=None, **kwargs):
     bundleList = []
 
     # match keys & remove none
-    metricKeys = key_match(bundleDicts, metricKey)
+    metricKeys = key_match(bundleDicts, metricKey, **kwargs)
     metricKeys = {key:value for (key, value) in metricKeys.items() if value is not None}
     
     # loop over all opsims
@@ -495,7 +526,7 @@ def plotHist(bundleDicts, metricKey, runNames=None, **kwargs):
         plt.axvline(int(vline), color='k', ls='--')
 
 
-def key_match(bundleDicts, metricKey, src_run=None, resultDbs=None):
+def key_match(bundleDicts, metricKey, src_run=None, resultDbs=None, **kwargs):
     """
     Return metricKeys in all metric bundleDict given a bundleDicts 
     and a metricKeys from one of the bundleDict. If the metricName is 
@@ -539,13 +570,14 @@ def key_match(bundleDicts, metricKey, src_run=None, resultDbs=None):
 
         # if neither above, do the brute force search using resultDbs
         elif (src_run is not None) and (src_run in runs) and (resultDbs is not None):
-            ref_row = get_metricMetadata(bundleDicts[src_run], metricName=metricKey[1])
+            ref_rows = get_metricMetadata(resultDbs[src_run], metricName=metricKey[1])
+            ref_row = ref_rows[ref_rows.metricId == metricKey[0]]
             ref_slicer = ref_row.slicerName.values[0]
-            ref_meta = ref_row.metricMetadata.values[0]
+            ref_meta = ref_row.metricInfoLabel.values[0]
 
             runMeta = resultDbs[run].getMetricDisplayInfo()
             mask1 = runMeta['slicerName'] == ref_slicer
-            mask2 = runMeta['metricMetadata'] == ref_meta
+            mask2 = runMeta['metricInfoLabel'] == ref_meta
             metricId = runMeta['metricId'][mask1 & mask2][0]
 
             metricKeys[run] = (metricId, metricKey[1])
@@ -569,7 +601,7 @@ def plotSky(bundleDicts, metricKey, **kwargs):
     # init handler, plot, etc.
     ph = plots.PlotHandler(savefig=False)
     healpixSky = plots.HealpixSkyMap()
-    metricKeys = key_match(bundleDicts, metricKey) # match keys
+    metricKeys = key_match(bundleDicts, metricKey, **kwargs) # match keys
     metricKeys = {key:value for (key, value) in metricKeys.items() if value is not None}
     
     # option to provide own plotDict for MAF
